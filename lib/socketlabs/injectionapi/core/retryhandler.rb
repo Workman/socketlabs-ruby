@@ -20,6 +20,7 @@ module SocketLabs
                     @endpoint_url = endpoint
                     @retry_settings = settings
                     @error_codes = [500, 502, 503, 504]
+                    @auth_failed_codes = [401]
 
                 end
 
@@ -39,6 +40,11 @@ module SocketLabs
 
                             if @error_codes.include? response.status_code.to_i
                                 exception = SocketLabs::InjectionApi::Exceptions::ServerException.new("Failed to send email. Received #{response.status_code} from server.")
+
+                            elsif @auth_failed_codes.include?(response.status_code.to_i)
+                                exception = SocketLabs::InjectionApi::Exceptions::AuthenticationException.new("Failed to send email. Invalid Credentials.")
+                                break
+
                             else
                                 return response
                             end
